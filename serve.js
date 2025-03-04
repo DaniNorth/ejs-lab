@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
-app.set('view engine', 'ejs') //recommended fix by ChatGPT
+app.set('view engine' , 'ejs');
+const path = require('path');
 
 
 const RESTAURANT = {
@@ -52,9 +53,28 @@ const RESTAURANT = {
     ]
   }
   
-  app.get('/', (req, res) => {
-    res.render('home');
+app.get('/' , (req , res) => {
+  res.render('home', {
+      RESTAURANT
   });
+});
 
+app.get('/menu' , (req , res) => {
+  res.render('menu', { menu: RESTAURANT.menu });
+});
 
-  app.listen(3000);
+app.get('/menu/:category' , (req , res) => {
+  const category = req.params.category.toLowerCase();
+  const validCategories = ['mains' , 'desserts' , 'sides'];
+  
+  if (!validCategories.includes(category)) {
+      return res.status(404).send('<h1>Category Not Found</h1>');
+  }
+
+  const menuItems = RESTAURANT.menu.filter(item => item.category === category);
+  const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+
+  res.render('category' , { category: formattedCategory , menuItems });
+});
+
+app.listen(3000);
